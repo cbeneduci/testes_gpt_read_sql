@@ -7,7 +7,6 @@ BEGIN
 DECLARE _skills TEXT             DEFAULT _json ->> "$.skills";
 DECLARE _parametro varchar(20)           DEFAULT _json ->> "$.parametro";
 DECLARE _company_id INT                  DEFAULT _json ->> "$.company_id";
--- DECLARE _status VARCHAR(255)             DEFAULT _json ->> "$.status";
 
 SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 
@@ -108,73 +107,6 @@ ELSEIF _parametro = 'charts' THEN
 			,ROUND(SKILLS.answered_calls_percentage,0)															AS answered_calls_percentage
         FROM SKILLS
 		LEFT JOIN AGENTS ON 1=1;
-
-
-    /*
-    
-    CODIGO ANTIGO
-    
-    WITH 
-        AGENTS AS (
-            SELECT DISTINCT
-			 AGENT.LOGINID
-            ,AGENT.AWORKMODE
-            ,AGENT.DIRECTION
-            ,AGENT.WORKSKILL
-            FROM
-                meetaone_dados.consolidado_agent AGENT
-            JOIN SKILLS_FILTER_THE_DAY TS ON TS.Skill_ID = AGENT.skill
-                WHERE 1=1
-                    AND `DATE` = CAST(NOW() as DATE) 
-                    AND `TIME` = '23:59'
-                    # AND FIND_IN_SET(skill,_skills)
-                    AND COMPANY_ID = _company_id
-        ),
-        SKILLS AS (
-            SELECT 
-                 ROUND((SUM(ACCEPTABLE) / (SUM(ACDCALLS) + SUM(ABNCALLS))) * 100, 2) AS sla
-                ,SUM(CASE WHEN `TIME` = '23:59' THEN INQUEUE_INRING END) 			AS queue
-                ,MAX(OLDESTCALL) 				AS oldest_call_in_queue
-                ,SUM(ABNCALLS)					AS abandoned_calls
-                ,ROUND(SUM(C_TME * C_RECEBIDAS)/SUM(C_RECEBIDAS),2)         AS average_wait_time 
-                ,(SUM(ABNCALLS)/SUM(C_RECEBIDAS)*100)       	AS abandoned_calls_percentage 
-                ,SUM(C_RECEBIDAS)                           AS offered_calls
-				,SUM(ACDCALLS)                              AS answered_calls
-                ,SUM(C_TMA*ACDCALLS)/SUM(ACDCALLS)          AS average_talk_time
-                ,(SUM(ACDCALLS)/SUM(C_RECEBIDAS)*100)         AS answered_calls_percentage
-            FROM meetaone_dados.consolidado_skill
-            WHERE 1=1
-                AND `DATE` = CAST(NOW() as DATE) 
-                #AND `TIME` = '23:59'
-                AND FIND_IN_SET(skill,_skills)
-                AND COMPANY_ID = _company_id
-        )
-
-        SELECT 
-            0                                                                                                   AS skill
-            ,COUNT(DISTINCT(AGENTS.LOGINID))                                                                    AS logged
-            ,SUM(CASE WHEN AGENTS.AWORKMODE = 50 then 1 ELSE 0 end)                                             AS aux
-            ,SUM(CASE WHEN AGENTS.AWORKMODE = 30 AND FIND_IN_SET(AGENTS.WORKSKILL,_skills) then 1 ELSE 0 end)   AS talking
-            ,SUM(CASE WHEN AGENTS.AWORKMODE = 20 then 1 ELSE 0 end)                                             AS available
-            ,SUM(CASE WHEN AGENTS.AWORKMODE = 50 AND AGENTS.DIRECTION = 2 then 1 ELSE 0 END)                    AS aux_out
-            ,SUM(CASE WHEN AGENTS.AWORKMODE NOT IN (20,30,50) OR AGENTS.AWORKMODE = 30 AND NOT FIND_IN_SET(AGENTS.WORKSKILL,_skills) THEN 1 ELSE 0 END)                                AS `others`
-            ,SKILLS.queue                                                                                       AS queue
-            ,SKILLS.oldest_call_in_queue																		AS oldest_call_in_queue
-            ,SKILLS.sla                                                                                         AS service_level
-            ,SKILLS.average_wait_time																			AS average_wait_time
-            ,SKILLS.abandoned_calls																				AS abandoned_calls
-            ,ROUND(SKILLS.abandoned_calls_percentage,0)															AS abandoned_calls_percentage
-            ,SKILLS.offered_calls																				AS offered_calls
-            ,SKILLS.answered_calls																				AS answered_calls
-            ,SKILLS.average_talk_time																			AS average_talk_time
-			,ROUND(SKILLS.answered_calls_percentage,0)															AS answered_calls_percentage
-        FROM SKILLS
-		LEFT JOIN AGENTS ON 1=1;*/
-# recebidas, atendidas e tma
-
-
-
-
 
 ELSEIF _parametro = 'table' THEN
 
